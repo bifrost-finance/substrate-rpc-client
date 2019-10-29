@@ -1,0 +1,74 @@
+[package]
+name = "substrate-rpc-client"
+version = "0.1.0"
+authors = ["Jamie Deng <djptux@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+env_logger = "0.7"
+log = "0.4"
+hex = { version = "0.4", default-features=false, optional = true }
+primitive-types = { version = "0.5", default-features = false, features = ["codec"] }
+serde = { version = "1.0", optional = true, features = ["derive"] }
+serde_json = { version = "1.0", optional = true }
+ws = { version = "0.9", optional = true }
+
+[dependencies.codec]
+package = "parity-scale-codec"
+features = ["derive"]
+version = "1.0.0"
+default-features = false
+
+[dependencies.indices]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "srml-indices"
+default-features=false
+
+[dependencies.metadata]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "srml-metadata"
+default-features=false
+
+[dependencies.primitives]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "substrate-primitives"
+default-features=false
+
+[dependencies.runtime_version]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "sr-version"
+default-features=false
+
+[dependencies.runtime_primitives]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "sr-primitives"
+default-features=false
+
+[dependencies.rstd]
+git = 'https://github.com/paritytech/substrate'
+rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+package = "sr-std"
+default-features = false
+
+[dev-dependencies]
+keyring = { package = "substrate-keyring", git = "https://github.com/paritytech/substrate", rev = "d00d3137246bdb7d63fb6ef206957c539685322b" }
+
+[features]
+default = ["std"]
+std = [
+	"codec/std",
+	"hex",
+	"indices/std",
+	"metadata/std",
+	"runtime_primitives/std",
+	"runtime_version/std",
+	"primitives/std",
+	"serde/std",
+	"serde_json",
+	"ws",
+]
