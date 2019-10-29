@@ -17,11 +17,11 @@
 #[cfg(feature = "std")]
 #[macro_use] extern crate log;
 
-use codec::{Decode, Encode};
+pub use codec::{Compact, Decode, Encode};
 use metadata::RuntimeMetadataPrefixed;
 #[cfg(feature = "std")]
 use node_metadata::NodeMetadata;
-use primitives::H256 as Hash;
+use primitives::{crypto::Pair, H256 as Hash};
 use primitive_types::U256;
 use rstd::prelude::*;
 use runtime_version::RuntimeVersion;
@@ -45,7 +45,8 @@ pub mod rpc;
 pub mod utils;
 
 pub use extrinsic::xt_primitives::AccountId;
-pub use primitives::crypto::Pair;
+pub use primitives;
+pub use keyring;
 
 #[cfg(feature = "std")]
 #[derive(Clone)]
