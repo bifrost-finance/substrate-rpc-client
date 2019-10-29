@@ -21,7 +21,7 @@ use codec::{Decode, Encode};
 use metadata::RuntimeMetadataPrefixed;
 #[cfg(feature = "std")]
 use node_metadata::NodeMetadata;
-use primitives::{crypto::Pair, H256 as Hash};
+use primitives::H256 as Hash;
 use primitive_types::U256;
 use rstd::prelude::*;
 use runtime_version::RuntimeVersion;
@@ -44,7 +44,8 @@ pub mod rpc;
 #[cfg(feature = "std")]
 pub mod utils;
 
-use extrinsic::xt_primitives::AccountId;
+pub use extrinsic::xt_primitives::AccountId;
+pub use primitives::crypto::Pair;
 
 #[cfg(feature = "std")]
 #[derive(Clone)]
