@@ -33,6 +33,8 @@ use std::sync::mpsc::{channel, Sender as ThreadOut};
 #[cfg(feature = "std")]
 use utils::*;
 #[cfg(feature = "std")]
+use websocket::ClientBuilder;
+#[cfg(feature = "std")]
 use ws::Result as WsResult;
 
 #[macro_use]
@@ -193,4 +195,12 @@ impl<P> Api<P>
 
         rpc::start_event_subscriber(self.url.clone(), jsonreq.clone(), sender.clone());
     }
+}
+
+#[cfg(feature = "std")]
+pub fn is_online(ws_addr: &str) -> websocket::WebSocketResult<bool> {
+    let mut client = ClientBuilder::new(&ws_addr).unwrap();
+    let client = client.connect(None)?;
+    let _ = client.shutdown()?;
+    Ok(true)
 }
