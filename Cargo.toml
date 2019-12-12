@@ -8,54 +8,63 @@ edition = "2018"
 env_logger = "0.7"
 log = "0.4"
 hex = { version = "0.4", default-features=false, optional = true }
-primitive-types = { version = "0.5", default-features = false, features = ["codec"] }
+primitive-types = { version = "0.6", default-features = false, features = ["codec"] }
 serde = { version = "1.0", optional = true, features = ["derive"] }
 serde_json = { version = "1.0", optional = true }
 websocket = { version = "0.24", optional = true }
 ws = { version = "0.9", optional = true }
-keyring = { package = "substrate-keyring", git = "https://github.com/paritytech/substrate", rev = "d00d3137246bdb7d63fb6ef206957c539685322b", optional = true }
+keyring = { package = "substrate-keyring", git = "https://github.com/paritytech/substrate", rev = "605852eaa414ddae0bb12bb4974b9cba24ccf7db", optional = true }
 
 [dependencies.codec]
 package = "parity-scale-codec"
 features = ["derive"]
-version = "1.0.0"
+version = "1.1"
 default-features = false
 
 [dependencies.indices]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
-package = "srml-indices"
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
+package = "pallet-indices"
 default-features=false
 
 [dependencies.metadata]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
-package = "srml-metadata"
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
+package = "frame-metadata"
 default-features=false
 
 [dependencies.primitives]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
 package = "substrate-primitives"
 default-features=false
 
 [dependencies.runtime_version]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
 package = "sr-version"
 default-features=false
 
 [dependencies.runtime_primitives]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
 package = "sr-primitives"
 default-features=false
 
 [dependencies.rstd]
 git = 'https://github.com/paritytech/substrate'
-rev = 'd00d3137246bdb7d63fb6ef206957c539685322b'
+rev = '605852eaa414ddae0bb12bb4974b9cba24ccf7db'
 package = "sr-std"
 default-features = false
+
+[dependencies.node_primitives]
+git = "https://github.com/paritytech/substrate"
+rev = "605852eaa414ddae0bb12bb4974b9cba24ccf7db"
+package = "node-primitives"
+default-features=false
+
+[dev-dependencies]
+eos-chain = { git = "https://github.com/bifrost-codes/rust-eos", branch = "use-rust-secp256k1" }
 
 [features]
 default = ["std"]
@@ -66,6 +75,7 @@ std = [
 	"metadata/std",
 	"runtime_primitives/std",
 	"runtime_version/std",
+	"node_primitives/std",
 	"primitives/std",
 	"serde/std",
 	"serde_json",

@@ -15,6 +15,7 @@
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 #[cfg(feature = "std")]
 pub extern crate codec;
+pub extern crate node_primitives;
 
 #[macro_use]
 pub mod xt_macros;
