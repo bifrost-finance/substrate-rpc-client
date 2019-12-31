@@ -15,7 +15,7 @@
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 use hex::FromHexError;
 use primitive_types::U256;
-use primitives::{blake2_256, H256 as Hash, twox_128};
+use sp_core::{blake2_256, H256 as Hash, twox_128};
 
 pub fn storage_key_hash(module: &str, storage_key_name: &str, param: Option<Vec<u8>>) -> String {
     let mut key = [module, storage_key_name].join(" ").as_bytes().to_vec();

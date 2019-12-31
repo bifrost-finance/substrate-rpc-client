@@ -19,3 +19,4 @@ pub extern crate codec;
 #[macro_use]
 pub mod xt_macros;
 pub mod xt_primitives;
+pub mod address;

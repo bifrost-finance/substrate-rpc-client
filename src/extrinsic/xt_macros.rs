@@ -48,7 +48,7 @@ macro_rules! compose_call {
 /// * 'signer' - AccountKey that is used to sign the extrinsic.
 /// * 'call' - call as returned by the compose_call! macro or via substrate's call enums.
 /// * 'nonce' - signer's account nonce: u32
-/// * 'genesis_hash' - sr-primitives::Hash256/[u8; 32].
+/// * 'genesis_hash' - sp_core::Hash256/[u8; 32].
 /// * 'runtime_spec_version' - RuntimeVersion.spec_version/u32
 #[macro_export]
 macro_rules! compose_extrinsic_offline {
@@ -58,7 +58,7 @@ macro_rules! compose_extrinsic_offline {
     $genesis_hash: expr,
     $runtime_spec_version: expr) => {{
         use $crate::extrinsic::xt_primitives::*;
-        use $crate::primitives::crypto::Pair;;
+        use $crate::sp_core::crypto::Pair;;
 
         let extra = GenericExtra::new($nonce);
         let raw_payload = SignedPayload::from_raw(
@@ -112,7 +112,7 @@ macro_rules! compose_extrinsic {
                     call.clone(),
                     $api.get_nonce().unwrap(),
                     $api.genesis_hash,
-                    $api.runtime_version.spec_version
+                    $api.sp_version.spec_version
                 )
             } else {
                 UncheckedExtrinsicV3 {
@@ -128,7 +128,7 @@ macro_rules! compose_extrinsic {
 mod tests {
     use codec::{Compact, Encode};
     use keyring::AccountKeyring;
-    use primitives::{sr25519, crypto::Pair};
+    use sp_core::{sr25519, crypto::Pair};
     use crate::extrinsic::xt_primitives::*;
     use crate::utils::*;
     use crate::Api;

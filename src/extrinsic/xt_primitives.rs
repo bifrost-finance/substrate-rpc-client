@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
 use codec::{Compact, Decode, Encode};
-use indices::address::Address;
+use crate::extrinsic::address::Address;
 use primitive_types::H256;
-use primitives::{blake2_256, crypto::Pair};
-use rstd::prelude::*;
-use runtime_primitives::{AnySignature, traits::Verify, generic::Era};
+use sp_core::{blake2_256, crypto::Pair};
+use sp_std::prelude::*;
+use sp_runtime::{AnySignature, traits::Verify, generic::Era};
 #[cfg(feature = "std")]
 use std::fmt;
 
@@ -149,9 +149,9 @@ impl<Call, P> Encode for UncheckedExtrinsicV3<Call, P>
     }
 }
 
-/// Same function as in primitives::generic. Needed to be copied as it is private there.
+/// Same function as in sp_core::generic. Needed to be copied as it is private there.
 fn encode_with_vec_prefix<T: Encode, F: Fn(&mut Vec<u8>)>(encoder: F) -> Vec<u8> {
-    let size = rstd::mem::size_of::<T>();
+    let size = sp_std::mem::size_of::<T>();
     let reserve = match size {
         0..=0b0011_1111 => 1,
         0..=0b0011_1111_1111_1111 => 2,

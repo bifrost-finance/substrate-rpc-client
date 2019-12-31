@@ -21,10 +21,10 @@ pub use codec::{Compact, Decode, Encode};
 use metadata::RuntimeMetadataPrefixed;
 #[cfg(feature = "std")]
 use node_metadata::NodeMetadata;
-use primitives::{crypto::Pair, H256 as Hash};
+use sp_core::{crypto::Pair, H256 as Hash};
 use primitive_types::U256;
-use rstd::prelude::*;
-use runtime_version::RuntimeVersion;
+use sp_std::prelude::*;
+use sp_version::RuntimeVersion;
 
 #[cfg(feature = "std")]
 use rpc::json_req;
@@ -45,7 +45,7 @@ pub mod rpc;
 pub mod utils;
 
 pub use extrinsic::xt_primitives::AccountId;
-pub use primitives;
+pub use sp_core;
 pub use keyring;
 
 #[cfg(feature = "std")]
@@ -55,7 +55,7 @@ pub struct Api<P: Pair> {
     pub signer: Option<P>,
     pub genesis_hash: Hash,
     pub metadata: NodeMetadata,
-    pub runtime_version: RuntimeVersion,
+    pub sp_version: RuntimeVersion,
 }
 
 #[cfg(feature = "std")]
@@ -69,14 +69,14 @@ impl<P> Api<P>
         let meta = Self::_get_metadata(url.clone());
         let metadata = node_metadata::parse_metadata(&meta);
 
-        let runtime_version = Self::_get_runtime_version(url.clone());
+        let sp_version = Self::_get_runtime_version(url.clone());
 
         Self {
             url,
             signer: None,
             genesis_hash,
             metadata,
-            runtime_version,
+            sp_version,
         }
     }
 
