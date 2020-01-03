@@ -13,6 +13,7 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
+
 use client::*;
 use std::sync::mpsc::Sender as ThreadOut;
 use std::thread;

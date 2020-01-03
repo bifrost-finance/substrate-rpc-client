@@ -13,10 +13,40 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
+
+use codec::alloc::string::FromUtf8Error;
+use log::{debug, info};
 use metadata::{DecodeDifferent, RuntimeMetadata, RuntimeMetadataPrefixed};
 use serde::{Deserialize, Serialize};
 
+pub fn pretty_format(metadata: &RuntimeMetadataPrefixed) -> Result<String, FromUtf8Error> {
+    let buf = Vec::new();
+    let formatter = serde_json::ser::PrettyFormatter::with_indent(b" ");
+    let mut ser = serde_json::Serializer::with_formatter(buf, formatter);
+    metadata.serialize(&mut ser).unwrap();
+    String::from_utf8(ser.into_inner())
+}
+
 pub type NodeMetadata = Vec<Module>;
+
+pub trait Print {
+    fn print_events(&self);
+    fn print_calls(&self);
+}
+
+impl Print for NodeMetadata {
+    fn print_events(&self) {
+        for m in self {
+            m.print_events();
+        }
+    }
+
+    fn print_calls(&self) {
+        for m in self {
+            m.print_calls()
+        }
+    }
+}
 
 #[derive(Serialize, Deserialize, Debug, Default, Clone)]
 pub struct Module {
@@ -32,6 +62,22 @@ impl Module {
             calls: Vec::<Call>::new(),
             events: Vec::<Event>::new()
         }
+    }
+
+    pub fn print_events(&self) {
+        println!("----------------- Events for Module: {} -----------------\n", self.name);
+        for e in &self.events {
+            println!("{:?}", e);
+        }
+        println!()
+    }
+
+    pub fn print_calls(&self) {
+        println!("----------------- Calls for Module: {} -----------------\n", self.name);
+        for e in &self.calls {
+            println!("{:?}", e);
+        }
+        println!()
     }
 }
 
@@ -88,10 +134,13 @@ pub fn parse_metadata(metadata: &RuntimeMetadataPrefixed) -> Vec<Module> {
             match &value.modules {
                 DecodeDifferent::Decoded(mods) => {
                     let modules = mods;
+                    debug!("-------------------- modules ----------------");
                     for module in modules {
+                        debug!("module: {:?}", module.name);
                         let mut _mod = Module::new(&module.name);
                         match &module.calls {
                             Some(DecodeDifferent::Decoded(calls)) => {
+                                debug!("-------------------- calls ----------------");
 
                                 if calls.is_empty() {
                                     // indices modules does for some reason list `Some([])' as calls and is thus counted in the call enum
@@ -114,11 +163,13 @@ pub fn parse_metadata(metadata: &RuntimeMetadataPrefixed) -> Vec<Module> {
                                     _mod.calls.push(_call);
                                 }
                             }
-                            _ => println!("No calls for this module"),
+                            _ => debug!("No calls for this module"),
                         }
 
                         match &module.event {
                             Some(DecodeDifferent::Decoded(event)) => {
+                                debug!("-------------------- events ----------------");
+                                debug!("{:?}", event);
                                 if event.is_empty() {
                                     // indices modules does for some reason list `Some([])' as calls and is thus counted in the call enum
                                     // there might be others doing the same.
@@ -138,11 +189,15 @@ pub fn parse_metadata(metadata: &RuntimeMetadataPrefixed) -> Vec<Module> {
                                     _mod.events.push(_event);
                                 }
                             },
-                            _ => println!("No calls for this module"),
+                            _ => debug!("No calls for this module"),
                         }
 
                         mod_vec.push(_mod);
                     }
+                    for m in &mod_vec {
+                        info!("{:?}", m);
+                    }
+                    debug!("successfully decoded metadata");
                 }
                 _ => unreachable!("There are always modules present; qed"),
             }

@@ -13,6 +13,9 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
+
+use crate::rpc::json_req::REQUEST_TRANSFER;
+use log::{debug, error, info};
 use std::sync::mpsc::Sender as ThreadOut;
 use ws::{CloseCode, Handler, Handshake, Message, Result, Sender};
 
@@ -27,11 +30,14 @@ pub struct RpcClient {
 
 impl Handler for RpcClient {
     fn on_open(&mut self, _: Handshake) -> Result<()> {
+        info!("sending request: {}", self.request);
         self.out.send(self.request.clone()).unwrap();
         Ok(())
     }
 
     fn on_message(&mut self, msg: Message) -> Result<()> {
+        info!("got message");
+        debug!("{}", msg);
         (self.on_message_fn)(msg, self.out.clone(), self.result.clone())
     }
 }

@@ -13,25 +13,37 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
+
 use hex::FromHexError;
 use primitive_types::U256;
 use sp_core::{blake2_256, H256 as Hash, twox_128};
 
-pub fn storage_key_hash(module: &str, storage_key_name: &str, param: Option<Vec<u8>>) -> String {
+fn storage_key_hash_vec(module: &str, storage_key_name: &str, param: Option<Vec<u8>>) -> Vec<u8> {
     let mut key = [module, storage_key_name].join(" ").as_bytes().to_vec();
-    let mut keyhash;
-
     match param {
         Some(par) => {
-            key.append(&mut par.clone());
-            keyhash = hex::encode(blake2_256(&key));
+            key.extend(&par);
+            blake2_256(&key).to_vec()
         },
         _ => {
-            keyhash = hex::encode(twox_128(&key));
+            twox_128(&key).to_vec()
         },
     }
-    keyhash.insert_str(0, "0x");
-    keyhash
+}
+
+pub fn storage_key_hash(module: &str, storage_key_name: &str, param: Option<Vec<u8>>) -> String {
+    let mut keyhash_str = hex::encode(
+        storage_key_hash_vec(module, storage_key_name, param));
+    keyhash_str.insert_str(0, "0x");
+    keyhash_str
+}
+
+pub fn storage_key_hash_double_map(module: &str, storage_key_name: &str, first: Vec<u8>, second: Vec<u8>) -> String {
+    let mut keyhash = storage_key_hash_vec(module, storage_key_name, Some(first));
+    keyhash.extend(&blake2_256(&second).to_vec());
+    let mut keyhash_str = hex::encode(keyhash);
+    keyhash_str.insert_str(0, "0x");
+    keyhash_str
 }
 
 pub fn hexstr_to_vec(hexstr: String) -> Result<Vec<u8>, FromHexError> {
@@ -40,10 +52,10 @@ pub fn hexstr_to_vec(hexstr: String) -> Result<Vec<u8>, FromHexError> {
         .to_string()
         .trim_start_matches("0x")
         .to_string();
-	match hexstr.as_str() {
-		"null" => Ok(vec!(0u8)),
-		_ => hex::decode(&hexstr),
-	}
+    match hexstr.as_str() {
+        "null" => Ok(vec!(0u8)),
+        _ => hex::decode(&hexstr),
+    }
 }
 
 pub fn hexstr_to_u64(hexstr: String) -> Result<u64, FromHexError> {
@@ -139,4 +151,3 @@ mod tests {
         assert_eq!(hexstr_to_hash("0x0q".to_string()), Err(hex::FromHexError::InvalidHexCharacter{c: 'q', index:1}));
     }
 }
-

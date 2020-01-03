@@ -13,11 +13,17 @@
 
 // You should have received a copy of the GNU General Public License
 // along with Bifrost.  If not, see <http://www.gnu.org/licenses/>.
+
 #![cfg_attr(not(feature = "std"), no_std)]
 #[cfg(feature = "std")]
 #[macro_use] extern crate log;
 
-pub use codec::{Compact, Decode, Encode};
+#[cfg(feature = "std")]
+use std::sync::mpsc::channel;
+#[cfg(feature = "std")]
+use std::sync::mpsc::Sender as ThreadOut;
+
+pub use codec::{Decode, Encode};
 use metadata::RuntimeMetadataPrefixed;
 #[cfg(feature = "std")]
 use node_metadata::NodeMetadata;
@@ -25,15 +31,15 @@ use sp_core::{crypto::Pair, H256 as Hash};
 use primitive_types::U256;
 use sp_std::prelude::*;
 use sp_version::RuntimeVersion;
-
 #[cfg(feature = "std")]
-use rpc::json_req;
-#[cfg(feature = "std")]
-use std::sync::mpsc::{channel, Sender as ThreadOut};
-#[cfg(feature = "std")]
-use utils::*;
+use websocket::ClientBuilder;
 #[cfg(feature = "std")]
 use ws::Result as WsResult;
+#[cfg(feature = "std")]
+use rpc::json_req;
+
+#[cfg(feature = "std")]
+use utils::*;
 
 #[macro_use]
 pub mod extrinsic;
@@ -44,13 +50,17 @@ pub mod rpc;
 #[cfg(feature = "std")]
 pub mod utils;
 
-pub use extrinsic::xt_primitives::AccountId;
 pub use sp_core;
 pub use keyring;
+use sp_runtime::{AccountId32, MultiSignature};
 
 #[cfg(feature = "std")]
 #[derive(Clone)]
-pub struct Api<P: Pair> {
+pub struct Api<P>
+    where
+        P: Pair,
+        MultiSignature: From<P::Signature>,
+{
     url: String,
     pub signer: Option<P>,
     pub genesis_hash: Hash,
@@ -62,14 +72,18 @@ pub struct Api<P: Pair> {
 impl<P> Api<P>
     where
         P: Pair,
+        MultiSignature: From<P::Signature>,
 {
     pub fn new(url: String) -> Self {
         let genesis_hash = Self::_get_genesis_hash(url.clone());
+        info!("Got genesis hash: {:?}", genesis_hash);
 
         let meta = Self::_get_metadata(url.clone());
         let metadata = node_metadata::parse_metadata(&meta);
+        info!("Metadata: {:?}", metadata);
 
         let sp_version = Self::_get_runtime_version(url.clone());
+	    info!("Runtime Version: {:?}", sp_version);
 
         Self {
             url,
@@ -95,6 +109,7 @@ impl<P> Api<P>
     fn _get_runtime_version(url: String) -> RuntimeVersion {
         let jsonreq = json_req::state_get_runtime_version();
         let version_str = Self::_get_request(url, jsonreq.to_string()).unwrap(); //expect("Fetching runtime version from node failed");
+        debug!("got the following runtime version (raw): {}", version_str);
         serde_json::from_str(&version_str).unwrap()
     }
 
@@ -113,8 +128,7 @@ impl<P> Api<P>
             "System",
             "AccountNonce",
             Some(signer.encode()),
-        )
-        .unwrap();
+        ).unwrap();
         let nonce = hexstr_to_u256(result_str).unwrap_or(U256::from_little_endian(&[0, 0, 0, 0]));
         nonce.low_u32()
     }
@@ -126,7 +140,20 @@ impl<P> Api<P>
         param: Option<Vec<u8>>,
     ) -> WsResult<String> {
         let keyhash = storage_key_hash(module, storage_key_name, param);
+        debug!("with storage key: {}", keyhash);
+        let jsonreq = json_req::state_get_storage(&keyhash);
+        Self::_get_request(url, jsonreq.to_string())
+    }
 
+    fn _get_storage_double_map(
+        url: String,
+        module: &str,
+        storage_key_name: &str,
+        first: Vec<u8>,
+        second: Vec<u8>
+    ) -> WsResult<String> {
+        let keyhash = storage_key_hash_double_map(module, storage_key_name, first, second);
+        debug!("with storage key: {}", keyhash);
         let jsonreq = json_req::state_get_storage(&keyhash);
         Self::_get_request(url, jsonreq.to_string())
     }
@@ -143,6 +170,14 @@ impl<P> Api<P>
         Self::_get_metadata(self.url.clone())
     }
 
+    pub fn get_spec_version(&self) -> u32 {
+        Self::_get_runtime_version(self.url.clone()).spec_version
+    }
+
+    pub fn get_genesis_hash(&self) -> Hash {
+        Self::_get_genesis_hash(self.url.clone())
+    }
+
     pub fn get_nonce(&self) -> Result<u32, &str> {
         match &self.signer {
             Some(key) => {
@@ -154,9 +189,10 @@ impl<P> Api<P>
         }
     }
 
-    pub fn get_free_balance(&self, address: &AccountId) -> U256 {
+    pub fn get_free_balance(&self, address: &AccountId32) -> U256 {
+        let id: &[u8; 32] = address.as_ref();
         let result_str = self
-            .get_storage("Balances", "FreeBalance", Some(address.0.encode()))
+            .get_storage("Balances", "FreeBalance", Some(id.to_owned().encode()))
             .unwrap();
         hexstr_to_u256(result_str).unwrap()
     }
@@ -174,7 +210,20 @@ impl<P> Api<P>
         Self::_get_storage(self.url.clone(), storage_prefix, storage_key_name, param)
     }
 
+    pub fn get_storage_double_map(
+        &self,
+        storage_prefix: &str,
+        storage_key_name: &str,
+        first: Vec<u8>,
+        second: Vec<u8>,
+    ) -> WsResult<String> {
+        Self::_get_storage_double_map(self.url.clone(), storage_prefix, storage_key_name,
+                                      first, second)
+    }
+
     pub fn send_extrinsic(&self, xthex_prefixed: String) -> WsResult<Hash> {
+        debug!("sending extrinsic: {:?}", xthex_prefixed);
+
         let jsonreq = json_req::author_submit_and_watch_extrinsic(&xthex_prefixed).to_string();
 
         let (result_in, result_out) = channel();
@@ -188,9 +237,19 @@ impl<P> Api<P>
     }
 
     pub fn subscribe_events(&self, sender: ThreadOut<String>) {
+        debug!("subscribing to events");
         let key = storage_key_hash("System", "Events", None);
         let jsonreq = json_req::state_subscribe_storage(&key).to_string();
 
         rpc::start_event_subscriber(self.url.clone(), jsonreq.clone(), sender.clone());
     }
+}
+
+
+#[cfg(feature = "std")]
+pub fn is_online(ws_addr: &str) -> websocket::WebSocketResult<bool> {
+    let mut client = ClientBuilder::new(&ws_addr).unwrap();
+    let client = client.connect(None)?;
+    let _ = client.shutdown()?;
+    Ok(true)
 }
