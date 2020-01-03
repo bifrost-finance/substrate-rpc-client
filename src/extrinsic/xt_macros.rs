@@ -268,7 +268,7 @@ mod tests {
 
         let proposal = compose_call!(
             api.metadata.clone(),
-            "BridgeEOS",
+            "BridgeEos",
             "init_schedule",
             v2_producers,
             signed_blocks_headers,
@@ -383,7 +383,7 @@ mod tests {
 
         let proposal = compose_call!(
             api.metadata.clone(),
-            "BridgeEOS",
+            "BridgeEos",
             "prove_action",
             action,
             action_receipt,
@@ -441,7 +441,7 @@ mod tests {
 
         let proposal = compose_call!(
             api.metadata.clone(),
-            "BridgeEOS",
+            "BridgeEos",
             "change_schedule",
             merkle,
             signed_blocks_headers,
