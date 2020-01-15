@@ -78,6 +78,10 @@ pub fn state_get_storage_with_id(key_hash: &str, id: u32) -> Value {
     json_req("state_getStorage", key_hash, id)
 }
 
+pub fn state_account_next_index(public_key: &str, id: u32) -> Value {
+    json_req("account_nextIndex", public_key, id)
+}
+
 pub fn author_submit_and_watch_extrinsic(xthex_prefixed: &str) -> Value {
     author_submit_and_watch_extrinsic_with_id(xthex_prefixed, REQUEST_TRANSFER)
 }

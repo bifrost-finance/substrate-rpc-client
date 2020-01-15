@@ -181,9 +181,14 @@ impl<P> Api<P>
     pub fn get_nonce(&self) -> Result<u32, &str> {
         match &self.signer {
             Some(key) => {
-                let mut arr: [u8; 32] = Default::default();
-                arr.clone_from_slice(key.to_owned().public().as_ref());
-                Ok(Self::_get_nonce(self.url.clone(), arr))
+                use sp_core::crypto::Ss58Codec;
+                use std::str::FromStr;
+
+                let public_key_str = format!("{}", key.to_owned().public().to_ss58check());
+                let jsonreq = json_req::state_account_next_index(public_key_str.as_ref(), 1);
+                let result_str = Self::_get_request(self.url.clone(), jsonreq.to_string()).unwrap();
+
+                Ok(u32::from_str(result_str.as_ref()).unwrap_or(0))
             },
             None => Err("Can't get nonce when no signer is set"),
         }

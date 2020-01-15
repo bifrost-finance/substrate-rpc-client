@@ -14,13 +14,13 @@ serde_json = { version = "1.0", optional = true }
 websocket = { version = "0.24", optional = true }
 ws = { version = "0.9", optional = true }
 
-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", optional = true }
-metadata = { package = "frame-metadata", git = "https://github.com/paritytech/substrate", default-features=false }
+keyring = { version = "2.0.0", package = "sp-keyring", git = "https://github.com/paritytech/substrate", optional = true }
+metadata = { version = "2.0.0", package = "frame-metadata", git = "https://github.com/paritytech/substrate", default-features=false }
 node-primitives = { git = "https://github.com/paritytech/substrate", default-features=false }
-sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate", default-features=false }
-sp-runtime = { git = "https://github.com/paritytech/substrate", default-features=false }
-sp-std = { git = "https://github.com/paritytech/substrate", default-features=false }
-sp-version = { git = "https://github.com/paritytech/substrate", default-features=false }
+sp-core = { version = "2.0.0", package = "sp-core", git = "https://github.com/paritytech/substrate", default-features=false }
+sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", default-features=false }
+sp-std = { version = "2.0.0", git = "https://github.com/paritytech/substrate", default-features=false }
+sp-version = { version = "2.0.0", git = "https://github.com/paritytech/substrate", default-features=false }
 
 [dev-dependencies]
 env_logger = "0.7"
