@@ -260,7 +260,6 @@ pub fn is_online(ws_addr: &str) -> websocket::WebSocketResult<bool> {
 }
 
 pub fn send_transaction(url: &str, to: &str, amount: u64) {
-    env_logger::init();
     let from = keyring::AccountKeyring::Alice.pair();
     let api = Api::new(format!("ws://{}", url)).set_signer(from.clone());
 
