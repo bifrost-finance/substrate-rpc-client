@@ -107,7 +107,6 @@ macro_rules! compose_extrinsic {
     $call: expr
     $(, $args: expr) *) => {
         {
-            use $crate::extrinsic::codec::Compact;
             use $crate::extrinsic::xt_primitives::*;
 
             info!("Composing generic extrinsic for module {:?} and call {:?}", $module, $call);
@@ -133,12 +132,11 @@ macro_rules! compose_extrinsic {
 
 #[cfg(test)]
 mod tests {
-    use codec::{Compact, Encode};
+    use codec::Compact;
     use keyring::AccountKeyring;
-    use sp_core::{sr25519, crypto::Pair};
-    use node_primitives::{AccountIndex, AccountId};
+    use sp_core::crypto::Pair;
+    use node_primitives::AccountId;
     use crate::extrinsic::xt_primitives::*;
-    use crate::utils::*;
     use crate::Api;
     use eos_chain::{
         Action, ActionReceipt, Checksum256, get_proof,
@@ -464,7 +462,6 @@ mod tests {
 
     fn read_json_from_file(json_name: impl AsRef<str>) -> Result<String, Box<dyn Error>> {
         let path = Path::new(concat!(env!("CARGO_MANIFEST_DIR"), "/src/test_data/")).join(json_name.as_ref());
-        dbg!(&path);
         let mut file = File::open(path)?;
         let mut json_str = String::new();
         file.read_to_string(&mut json_str)?;
@@ -480,7 +477,7 @@ mod tests {
 
         let to = AccountId::from(AccountKeyring::Bob);
         let result = api.get_free_balance(&to);
-        info!("[+] Bob's Free Balance is is {}\n", result);
+        println!("[+] Bob's Free Balance is is {}\n", result);
 
         let acc_id = GenericAddress::from(to.clone());
         // generate extrinsic
@@ -500,8 +497,9 @@ mod tests {
 
         println!("[+] Composed extrinsic: {:?}\n", xt);
         // send and watch extrinsic until finalized
-        let tx_hash = api.send_extrinsic(xt.hex_encode()).unwrap();
-        println!("[+] Transaction got finalized. Hash: {:?}\n", tx_hash);
+        let tx_hash = api.send_extrinsic(xt.hex_encode());
+        assert!(tx_hash.is_ok());
+        println!("[+] Transaction got finalized. Hash: {:?}\n", tx_hash.unwrap());
 
         // verify that Bob's free Balance increased
         let result = api.get_free_balance(&to);

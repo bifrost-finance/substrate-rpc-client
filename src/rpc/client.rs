@@ -17,7 +17,7 @@
 use crate::rpc::json_req::REQUEST_TRANSFER;
 use log::{debug, error, info};
 use std::sync::mpsc::Sender as ThreadOut;
-use ws::{CloseCode, Handler, Handshake, Message, Result, Sender};
+use ws::{CloseCode, Handler, Handshake, Message, Result, Sender, ErrorKind, Error};
 
 pub type OnMessageFn = fn(msg: Message, out: Sender, result: ThreadOut<String>) -> Result<()>;
 
@@ -36,8 +36,6 @@ impl Handler for RpcClient {
     }
 
     fn on_message(&mut self, msg: Message) -> Result<()> {
-        info!("got message");
-        debug!("{}", msg);
         (self.on_message_fn)(msg, self.out.clone(), self.result.clone())
     }
 }
@@ -80,7 +78,11 @@ pub fn on_extrinsic_msg(msg: Message, out: Sender, result: ThreadOut<String>) ->
         Some(idstr) => match idstr.parse::<u32>() {
             Ok(req_id) => match req_id {
                 REQUEST_TRANSFER => match value.get("error") {
-                    Some(err) => error!("ERROR: {:?}", err),
+                    Some(err) => {
+//                        result.send("hello".to_string()).map_err(|_| Error::new(ErrorKind::Internal, err.to_string()))?;
+//                        ()
+                        error!("ERROR: {:?}", err)
+                    },
                     _ => debug!("no error"),
                 },
                 _ => debug!("Unknown request id"),

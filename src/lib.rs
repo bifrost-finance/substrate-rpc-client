@@ -34,7 +34,7 @@ use sp_version::RuntimeVersion;
 #[cfg(feature = "std")]
 use websocket::ClientBuilder;
 #[cfg(feature = "std")]
-use ws::Result as WsResult;
+use ws::{ErrorKind, Error, Result as WsResult};
 #[cfg(feature = "std")]
 use rpc::json_req;
 
@@ -257,4 +257,30 @@ pub fn is_online(ws_addr: &str) -> websocket::WebSocketResult<bool> {
     let client = client.connect(None)?;
     let _ = client.shutdown()?;
     Ok(true)
+}
+
+pub fn send_transaction(url: &str, to: &str, amount: u64) {
+    env_logger::init();
+    let from = keyring::AccountKeyring::Alice.pair();
+    let api = Api::new(format!("ws://{}", url)).set_signer(from.clone());
+
+    let proposal = crate::compose_call!(
+        api.metadata.clone(),
+        "BridgeEos",
+        "tx_out",
+        to.as_bytes().to_vec(),
+        amount
+    );
+
+    let xt: crate::extrinsic::xt_primitives::UncheckedExtrinsicV4<_> = crate::compose_extrinsic!(
+        api.clone(),
+        "Sudo",
+        "sudo",
+        proposal
+    );
+
+    println!("[+] Composed extrinsic: {:?}\n", xt);
+    // send and watch extrinsic until finalized
+    let tx_hash = api.send_extrinsic(xt.hex_encode());
+    println!("[+] Transaction got finalized. Hash: {:?}\n", tx_hash.unwrap());
 }
