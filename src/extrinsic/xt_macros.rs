@@ -505,4 +505,36 @@ mod tests {
         let result = api.get_free_balance(&to);
         println!("[+] Bob's Free Balance is now {}\n", result);
     }
+
+    #[test]
+    fn test_offchain_worker() {
+        env_logger::init();
+        let url = "127.0.0.1:9944";
+        let from = AccountKeyring::Alice.pair();
+        let api = Api::new(format!("ws://{}", url)).set_signer(from.clone());
+
+        let to = AccountId::from(AccountKeyring::Bob);
+
+        let to = b"jim".to_vec();
+        let proposal = compose_call!(
+            api.metadata.clone(),
+            "BridgeEos",
+            "tx_out",
+            to,
+            1230u32
+        );
+
+        let xt: UncheckedExtrinsicV4<_> = compose_extrinsic!(
+            api.clone(),
+            "Sudo",
+            "sudo",
+            proposal
+        );
+
+        println!("[+] Composed extrinsic: {:?}\n", xt);
+        // send and watch extrinsic until finalized
+        let tx_hash = api.send_extrinsic(xt.hex_encode());
+        dbg!(&tx_hash);
+        println!("[+] Transaction got finalized. Hash: {:?}\n", tx_hash.unwrap());
+    }
 }
