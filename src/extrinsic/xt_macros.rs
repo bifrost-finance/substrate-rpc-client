@@ -521,7 +521,7 @@ mod tests {
             "BridgeEos",
             "tx_out",
             to,
-            1230u32
+            1 * 10u32.pow(8)
         );
 
         let xt: UncheckedExtrinsicV4<_> = compose_extrinsic!(

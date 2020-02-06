@@ -98,6 +98,10 @@ pub fn on_extrinsic_msg(msg: Message, out: Sender, result: ThreadOut<String>) ->
                     match value["params"]["result"].as_str() {
                         Some(res) => debug!("author_extrinsicUpdate: {}", res),
                         _ => {
+                            // ensure this transaction is finalized, or wait it until finalized.
+                            if value["params"]["result"]["finalized"].as_str().is_none() {
+                                return Ok(())
+                            }
                             debug!(
                                 "author_extrinsicUpdate: finalized: {}",
                                 value["params"]["result"]["finalized"].as_str().unwrap()
