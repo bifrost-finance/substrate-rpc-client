@@ -513,15 +513,13 @@ mod tests {
         let from = AccountKeyring::Alice.pair();
         let api = Api::new(format!("ws://{}", url)).set_signer(from.clone());
 
-        let to = AccountId::from(AccountKeyring::Bob);
-
         let to = b"jim".to_vec();
         let proposal = compose_call!(
             api.metadata.clone(),
             "BridgeEos",
             "tx_out",
             to,
-            1 * 10u32.pow(8)
+            1 * 10u128.pow(12)
         );
 
         let xt: UncheckedExtrinsicV4<_> = compose_extrinsic!(

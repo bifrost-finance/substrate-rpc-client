@@ -6,6 +6,7 @@ edition = "2018"
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive"] }
+env_logger = "0.7"
 hex = { version = "0.4", default-features=false, optional = true }
 log = "0.4"
 primitive-types = { version = "0.6", default-features = false, features = ["codec"] }
@@ -23,7 +24,6 @@ sp-std = { version = "2.0.0", git = "https://github.com/paritytech/substrate", d
 sp-version = { version = "2.0.0", git = "https://github.com/paritytech/substrate", default-features=false }
 
 [dev-dependencies]
-env_logger = "0.7"
 eos-chain = { git = "https://github.com/bifrost-codes/rust-eos", branch = "use-rust-secp256k1" }
 
 [features]
