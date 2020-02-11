@@ -16,7 +16,7 @@ websocket = { version = "0.24", optional = true }
 ws = { version = "0.9", optional = true }
 
 keyring = { version = "2.0.0", package = "sp-keyring", git = "https://github.com/paritytech/substrate", optional = true }
-metadata = { version = "10.0.0", package = "frame-metadata", git = "https://github.com/paritytech/substrate", default-features=false }
+metadata = { version = "10.0.0", package = "frame-metadata", git = "https://github.com/paritytech/substrate", default-features=false, rev = "8f4495886a98d4a867d3f3813a8bf4dc6bca3a3f" }
 node-primitives = { git = "https://github.com/paritytech/substrate", default-features=false }
 sp-core = { version = "2.0.0", package = "sp-core", git = "https://github.com/paritytech/substrate", default-features=false }
 sp-runtime = { version = "2.0.0", git = "https://github.com/paritytech/substrate", default-features=false }
